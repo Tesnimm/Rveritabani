@@ -1,0 +1,69 @@
+---
+title: "deneme"
+output: html_document
+date: "2024-04-05"
+---
+
+```{r}
+library(readxl)
+employee<-readxl::read_xlsx("tbl_Employee.xlsx")
+performans<-readxl::read_xlsx("tbl_Perf.xlsx")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(DBI)
+library(RSQLite)
+library(dplyr)
+# Veritabanı bağlantısını oluşturun
+con <- dbConnect(RSQLite::SQLite(), dbname = "employeeveritabani.db")
+
+## Mevcut tabloları silme
+dbRemoveTable(con, "employee")
+dbRemoveTable(con, "performans")
+
+dbWriteTable(con, "employee", employee)
+dbWriteTable(con, "performans", performans)
+
+# Inner join işlemini yapma
+Joined <- inner_join(employee, performans, by = c("EmpID","GenderID"))
+head(Joined)
+
+library(openxlsx)
+write.xlsx(Joined, "Joined.xlsx")
+
+
+dbDisconnect(con)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+library(dygraphs)
+library(ggplot2)
+
+filtered_data <- subset(Joined)
+
+# Bar grafiğini oluşturalım
+bar_plot <- ggplot(data = filtered_data, aes(x = GenderID, y = EmpID)) +
+            geom_bar(stat = "identity", position="dodge",fill = "blue",colour="black")+
+            theme(axis.text.x = element_text(angle = 20, hjust = 1)
+
+print(bar_plot)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+
+```
+
+
